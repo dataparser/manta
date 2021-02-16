@@ -1,8 +1,9 @@
 package manta
 
 import (
-	"github.com/dotabuff/manta/dota"
 	"github.com/golang/protobuf/proto"
+
+	"github.com/dotabuff/manta/dota"
 )
 
 // Callbacks decodes and routes replay events to callback functions
@@ -1410,8 +1411,31 @@ func (c *Callbacks) OnCDOTAUserMsg_OutpostGrantedXP(fn func(*dota.CDOTAUserMsg_O
 }
 
 func (c *Callbacks) callByDemoType(t int32, buf []byte) error {
-	switch t {
-	case 0: // dota.EDemoCommands_DEM_Stop
+	fn, ok := funcByDemoType[t]
+	if ok {
+		return fn(c, buf)
+	}
+
+	if v(1) {
+		_debugf("warning: no demo type %d found", t)
+	}
+
+	return nil
+}
+
+func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
+	fn, ok := funcByPacketType[t]
+	if !ok {
+		return nil
+	}
+
+	return fn(c, buf)
+}
+
+type handler func(c *Callbacks, buf []byte) error
+
+var funcByDemoType = map[int32]handler{
+	0: func(c *Callbacks, buf []byte) error { // dota.EDemoCommands_DEM_Stop
 		if c.onCDemoStop == nil {
 			return nil
 		}
@@ -1430,7 +1454,8 @@ func (c *Callbacks) callByDemoType(t int32, buf []byte) error {
 
 		return nil
 
-	case 1: // dota.EDemoCommands_DEM_FileHeader
+	},
+	1: func(c *Callbacks, buf []byte) error { // dota.EDemoCommands_DEM_FileHeader
 		if c.onCDemoFileHeader == nil {
 			return nil
 		}
@@ -1449,7 +1474,8 @@ func (c *Callbacks) callByDemoType(t int32, buf []byte) error {
 
 		return nil
 
-	case 2: // dota.EDemoCommands_DEM_FileInfo
+	},
+	2: func(c *Callbacks, buf []byte) error { // dota.EDemoCommands_DEM_FileInfo
 		if c.onCDemoFileInfo == nil {
 			return nil
 		}
@@ -1468,7 +1494,8 @@ func (c *Callbacks) callByDemoType(t int32, buf []byte) error {
 
 		return nil
 
-	case 3: // dota.EDemoCommands_DEM_SyncTick
+	},
+	3: func(c *Callbacks, buf []byte) error { // dota.EDemoCommands_DEM_SyncTick
 		if c.onCDemoSyncTick == nil {
 			return nil
 		}
@@ -1487,7 +1514,8 @@ func (c *Callbacks) callByDemoType(t int32, buf []byte) error {
 
 		return nil
 
-	case 4: // dota.EDemoCommands_DEM_SendTables
+	},
+	4: func(c *Callbacks, buf []byte) error { // dota.EDemoCommands_DEM_SendTables
 		if c.onCDemoSendTables == nil {
 			return nil
 		}
@@ -1506,7 +1534,8 @@ func (c *Callbacks) callByDemoType(t int32, buf []byte) error {
 
 		return nil
 
-	case 5: // dota.EDemoCommands_DEM_ClassInfo
+	},
+	5: func(c *Callbacks, buf []byte) error { // dota.EDemoCommands_DEM_ClassInfo
 		if c.onCDemoClassInfo == nil {
 			return nil
 		}
@@ -1525,7 +1554,8 @@ func (c *Callbacks) callByDemoType(t int32, buf []byte) error {
 
 		return nil
 
-	case 6: // dota.EDemoCommands_DEM_StringTables
+	},
+	6: func(c *Callbacks, buf []byte) error { // dota.EDemoCommands_DEM_StringTables
 		if c.onCDemoStringTables == nil {
 			return nil
 		}
@@ -1544,7 +1574,8 @@ func (c *Callbacks) callByDemoType(t int32, buf []byte) error {
 
 		return nil
 
-	case 7: // dota.EDemoCommands_DEM_Packet
+	},
+	7: func(c *Callbacks, buf []byte) error { // dota.EDemoCommands_DEM_Packet
 		if c.onCDemoPacket == nil {
 			return nil
 		}
@@ -1563,7 +1594,8 @@ func (c *Callbacks) callByDemoType(t int32, buf []byte) error {
 
 		return nil
 
-	case 8: // dota.EDemoCommands_DEM_SignonPacket
+	},
+	8: func(c *Callbacks, buf []byte) error { // dota.EDemoCommands_DEM_SignonPacket
 		if c.onCDemoSignonPacket == nil {
 			return nil
 		}
@@ -1582,7 +1614,8 @@ func (c *Callbacks) callByDemoType(t int32, buf []byte) error {
 
 		return nil
 
-	case 9: // dota.EDemoCommands_DEM_ConsoleCmd
+	},
+	9: func(c *Callbacks, buf []byte) error { // dota.EDemoCommands_DEM_ConsoleCmd
 		if c.onCDemoConsoleCmd == nil {
 			return nil
 		}
@@ -1601,7 +1634,8 @@ func (c *Callbacks) callByDemoType(t int32, buf []byte) error {
 
 		return nil
 
-	case 10: // dota.EDemoCommands_DEM_CustomData
+	},
+	10: func(c *Callbacks, buf []byte) error { // dota.EDemoCommands_DEM_CustomData
 		if c.onCDemoCustomData == nil {
 			return nil
 		}
@@ -1620,7 +1654,8 @@ func (c *Callbacks) callByDemoType(t int32, buf []byte) error {
 
 		return nil
 
-	case 11: // dota.EDemoCommands_DEM_CustomDataCallbacks
+	},
+	11: func(c *Callbacks, buf []byte) error { // dota.EDemoCommands_DEM_CustomDataCallbacks
 		if c.onCDemoCustomDataCallbacks == nil {
 			return nil
 		}
@@ -1639,7 +1674,8 @@ func (c *Callbacks) callByDemoType(t int32, buf []byte) error {
 
 		return nil
 
-	case 12: // dota.EDemoCommands_DEM_UserCmd
+	},
+	12: func(c *Callbacks, buf []byte) error { // dota.EDemoCommands_DEM_UserCmd
 		if c.onCDemoUserCmd == nil {
 			return nil
 		}
@@ -1658,7 +1694,8 @@ func (c *Callbacks) callByDemoType(t int32, buf []byte) error {
 
 		return nil
 
-	case 13: // dota.EDemoCommands_DEM_FullPacket
+	},
+	13: func(c *Callbacks, buf []byte) error { // dota.EDemoCommands_DEM_FullPacket
 		if c.onCDemoFullPacket == nil {
 			return nil
 		}
@@ -1677,7 +1714,8 @@ func (c *Callbacks) callByDemoType(t int32, buf []byte) error {
 
 		return nil
 
-	case 14: // dota.EDemoCommands_DEM_SaveGame
+	},
+	14: func(c *Callbacks, buf []byte) error { // dota.EDemoCommands_DEM_SaveGame
 		if c.onCDemoSaveGame == nil {
 			return nil
 		}
@@ -1696,7 +1734,8 @@ func (c *Callbacks) callByDemoType(t int32, buf []byte) error {
 
 		return nil
 
-	case 15: // dota.EDemoCommands_DEM_SpawnGroups
+	},
+	15: func(c *Callbacks, buf []byte) error { // dota.EDemoCommands_DEM_SpawnGroups
 		if c.onCDemoSpawnGroups == nil {
 			return nil
 		}
@@ -1715,18 +1754,11 @@ func (c *Callbacks) callByDemoType(t int32, buf []byte) error {
 
 		return nil
 
-	}
-
-	if v(1) {
-		_debugf("warning: no demo type %d found", t)
-	}
-
-	return nil
+	},
 }
 
-func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
-	switch t {
-	case 0: // dota.NET_Messages_net_NOP
+var funcByPacketType = map[int32]handler{
+	0: func(c *Callbacks, buf []byte) error { // dota.NET_Messages_net_NOP
 		if c.onCNETMsg_NOP == nil {
 			return nil
 		}
@@ -1744,8 +1776,9 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
+	},
 
-	case 1: // dota.NET_Messages_net_Disconnect
+	1: func(c *Callbacks, buf []byte) error { // dota.NET_Messages_net_Disconnect
 		if c.onCNETMsg_Disconnect == nil {
 			return nil
 		}
@@ -1763,8 +1796,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 3: // dota.NET_Messages_net_SplitScreenUser
+	},
+	3: func(c *Callbacks, buf []byte) error { // dota.NET_Messages_net_SplitScreenUser
 		if c.onCNETMsg_SplitScreenUser == nil {
 			return nil
 		}
@@ -1782,8 +1815,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 4: // dota.NET_Messages_net_Tick
+	},
+	4: func(c *Callbacks, buf []byte) error { // dota.NET_Messages_net_Tick
 		if c.onCNETMsg_Tick == nil {
 			return nil
 		}
@@ -1801,8 +1834,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 5: // dota.NET_Messages_net_StringCmd
+	},
+	5: func(c *Callbacks, buf []byte) error { // dota.NET_Messages_net_StringCmd
 		if c.onCNETMsg_StringCmd == nil {
 			return nil
 		}
@@ -1820,8 +1853,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 6: // dota.NET_Messages_net_SetConVar
+	},
+	6: func(c *Callbacks, buf []byte) error { // dota.NET_Messages_net_SetConVar
 		if c.onCNETMsg_SetConVar == nil {
 			return nil
 		}
@@ -1839,8 +1872,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 7: // dota.NET_Messages_net_SignonState
+	},
+	7: func(c *Callbacks, buf []byte) error { // dota.NET_Messages_net_SignonState
 		if c.onCNETMsg_SignonState == nil {
 			return nil
 		}
@@ -1858,8 +1891,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 8: // dota.NET_Messages_net_SpawnGroup_Load
+	},
+	8: func(c *Callbacks, buf []byte) error { // dota.NET_Messages_net_SpawnGroup_Load
 		if c.onCNETMsg_SpawnGroup_Load == nil {
 			return nil
 		}
@@ -1877,8 +1910,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 9: // dota.NET_Messages_net_SpawnGroup_ManifestUpdate
+	},
+	9: func(c *Callbacks, buf []byte) error { // dota.NET_Messages_net_SpawnGroup_ManifestUpdate
 		if c.onCNETMsg_SpawnGroup_ManifestUpdate == nil {
 			return nil
 		}
@@ -1896,8 +1929,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 11: // dota.NET_Messages_net_SpawnGroup_SetCreationTick
+	},
+	11: func(c *Callbacks, buf []byte) error { // dota.NET_Messages_net_SpawnGroup_SetCreationTick
 		if c.onCNETMsg_SpawnGroup_SetCreationTick == nil {
 			return nil
 		}
@@ -1915,8 +1948,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 12: // dota.NET_Messages_net_SpawnGroup_Unload
+	},
+	12: func(c *Callbacks, buf []byte) error { // dota.NET_Messages_net_SpawnGroup_Unload
 		if c.onCNETMsg_SpawnGroup_Unload == nil {
 			return nil
 		}
@@ -1934,8 +1967,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 13: // dota.NET_Messages_net_SpawnGroup_LoadCompleted
+	},
+	13: func(c *Callbacks, buf []byte) error { // dota.NET_Messages_net_SpawnGroup_LoadCompleted
 		if c.onCNETMsg_SpawnGroup_LoadCompleted == nil {
 			return nil
 		}
@@ -1953,8 +1986,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 40: // dota.SVC_Messages_svc_ServerInfo
+	},
+	40: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_ServerInfo
 		if c.onCSVCMsg_ServerInfo == nil {
 			return nil
 		}
@@ -1972,8 +2005,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 41: // dota.SVC_Messages_svc_FlattenedSerializer
+	},
+	41: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_FlattenedSerializer
 		if c.onCSVCMsg_FlattenedSerializer == nil {
 			return nil
 		}
@@ -1991,8 +2024,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 42: // dota.SVC_Messages_svc_ClassInfo
+	},
+	42: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_ClassInfo
 		if c.onCSVCMsg_ClassInfo == nil {
 			return nil
 		}
@@ -2010,8 +2043,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 43: // dota.SVC_Messages_svc_SetPause
+	},
+	43: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_SetPause
 		if c.onCSVCMsg_SetPause == nil {
 			return nil
 		}
@@ -2029,8 +2062,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 44: // dota.SVC_Messages_svc_CreateStringTable
+	},
+	44: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_CreateStringTable
 		if c.onCSVCMsg_CreateStringTable == nil {
 			return nil
 		}
@@ -2048,8 +2081,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 45: // dota.SVC_Messages_svc_UpdateStringTable
+	},
+	45: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_UpdateStringTable
 		if c.onCSVCMsg_UpdateStringTable == nil {
 			return nil
 		}
@@ -2067,8 +2100,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 46: // dota.SVC_Messages_svc_VoiceInit
+	},
+	46: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_VoiceInit
 		if c.onCSVCMsg_VoiceInit == nil {
 			return nil
 		}
@@ -2086,8 +2119,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 47: // dota.SVC_Messages_svc_VoiceData
+	},
+	47: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_VoiceData
 		if c.onCSVCMsg_VoiceData == nil {
 			return nil
 		}
@@ -2105,8 +2138,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 48: // dota.SVC_Messages_svc_Print
+	},
+	48: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_Print
 		if c.onCSVCMsg_Print == nil {
 			return nil
 		}
@@ -2124,8 +2157,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 49: // dota.SVC_Messages_svc_Sounds
+	},
+	49: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_Sounds
 		if c.onCSVCMsg_Sounds == nil {
 			return nil
 		}
@@ -2143,8 +2176,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 50: // dota.SVC_Messages_svc_SetView
+	},
+	50: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_SetView
 		if c.onCSVCMsg_SetView == nil {
 			return nil
 		}
@@ -2162,8 +2195,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 51: // dota.SVC_Messages_svc_ClearAllStringTables
+	},
+	51: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_ClearAllStringTables
 		if c.onCSVCMsg_ClearAllStringTables == nil {
 			return nil
 		}
@@ -2181,8 +2214,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 52: // dota.SVC_Messages_svc_CmdKeyValues
+	},
+	52: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_CmdKeyValues
 		if c.onCSVCMsg_CmdKeyValues == nil {
 			return nil
 		}
@@ -2200,8 +2233,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 53: // dota.SVC_Messages_svc_BSPDecal
+	},
+	53: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_BSPDecal
 		if c.onCSVCMsg_BSPDecal == nil {
 			return nil
 		}
@@ -2219,8 +2252,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 54: // dota.SVC_Messages_svc_SplitScreen
+	},
+	54: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_SplitScreen
 		if c.onCSVCMsg_SplitScreen == nil {
 			return nil
 		}
@@ -2238,8 +2271,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 55: // dota.SVC_Messages_svc_PacketEntities
+	},
+	55: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_PacketEntities
 		if c.onCSVCMsg_PacketEntities == nil {
 			return nil
 		}
@@ -2257,8 +2290,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 56: // dota.SVC_Messages_svc_Prefetch
+	},
+	56: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_Prefetch
 		if c.onCSVCMsg_Prefetch == nil {
 			return nil
 		}
@@ -2276,8 +2309,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 57: // dota.SVC_Messages_svc_Menu
+	},
+	57: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_Menu
 		if c.onCSVCMsg_Menu == nil {
 			return nil
 		}
@@ -2295,8 +2328,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 58: // dota.SVC_Messages_svc_GetCvarValue
+	},
+	58: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_GetCvarValue
 		if c.onCSVCMsg_GetCvarValue == nil {
 			return nil
 		}
@@ -2314,8 +2347,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 59: // dota.SVC_Messages_svc_StopSound
+	},
+	59: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_StopSound
 		if c.onCSVCMsg_StopSound == nil {
 			return nil
 		}
@@ -2333,8 +2366,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 60: // dota.SVC_Messages_svc_PeerList
+	},
+	60: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_PeerList
 		if c.onCSVCMsg_PeerList == nil {
 			return nil
 		}
@@ -2352,8 +2385,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 61: // dota.SVC_Messages_svc_PacketReliable
+	},
+	61: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_PacketReliable
 		if c.onCSVCMsg_PacketReliable == nil {
 			return nil
 		}
@@ -2371,8 +2404,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 62: // dota.SVC_Messages_svc_HLTVStatus
+	},
+	62: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_HLTVStatus
 		if c.onCSVCMsg_HLTVStatus == nil {
 			return nil
 		}
@@ -2390,8 +2423,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 63: // dota.SVC_Messages_svc_ServerSteamID
+	},
+	63: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_ServerSteamID
 		if c.onCSVCMsg_ServerSteamID == nil {
 			return nil
 		}
@@ -2409,8 +2442,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 70: // dota.SVC_Messages_svc_FullFrameSplit
+	},
+	70: func(c *Callbacks, buf []byte) error { // dota.SVC_Messages_svc_FullFrameSplit
 		if c.onCSVCMsg_FullFrameSplit == nil {
 			return nil
 		}
@@ -2428,8 +2461,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 101: // dota.EBaseUserMessages_UM_AchievementEvent
+	},
+	101: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_AchievementEvent
 		if c.onCUserMessageAchievementEvent == nil {
 			return nil
 		}
@@ -2447,8 +2480,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 102: // dota.EBaseUserMessages_UM_CloseCaption
+	},
+	102: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_CloseCaption
 		if c.onCUserMessageCloseCaption == nil {
 			return nil
 		}
@@ -2466,8 +2499,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 103: // dota.EBaseUserMessages_UM_CloseCaptionDirect
+	},
+	103: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_CloseCaptionDirect
 		if c.onCUserMessageCloseCaptionDirect == nil {
 			return nil
 		}
@@ -2485,8 +2518,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 104: // dota.EBaseUserMessages_UM_CurrentTimescale
+	},
+	104: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_CurrentTimescale
 		if c.onCUserMessageCurrentTimescale == nil {
 			return nil
 		}
@@ -2504,8 +2537,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 105: // dota.EBaseUserMessages_UM_DesiredTimescale
+	},
+	105: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_DesiredTimescale
 		if c.onCUserMessageDesiredTimescale == nil {
 			return nil
 		}
@@ -2523,8 +2556,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 106: // dota.EBaseUserMessages_UM_Fade
+	},
+	106: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_Fade
 		if c.onCUserMessageFade == nil {
 			return nil
 		}
@@ -2542,8 +2575,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 107: // dota.EBaseUserMessages_UM_GameTitle
+	},
+	107: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_GameTitle
 		if c.onCUserMessageGameTitle == nil {
 			return nil
 		}
@@ -2561,8 +2594,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 109: // dota.EBaseUserMessages_UM_HintText
+	},
+	109: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_HintText
 		if c.onCUserMessageHintText == nil {
 			return nil
 		}
@@ -2580,8 +2613,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 110: // dota.EBaseUserMessages_UM_HudMsg
+	},
+	110: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_HudMsg
 		if c.onCUserMessageHudMsg == nil {
 			return nil
 		}
@@ -2599,8 +2632,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 111: // dota.EBaseUserMessages_UM_HudText
+	},
+	111: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_HudText
 		if c.onCUserMessageHudText == nil {
 			return nil
 		}
@@ -2618,8 +2651,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 112: // dota.EBaseUserMessages_UM_KeyHintText
+	},
+	112: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_KeyHintText
 		if c.onCUserMessageKeyHintText == nil {
 			return nil
 		}
@@ -2637,8 +2670,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 113: // dota.EBaseUserMessages_UM_ColoredText
+	},
+	113: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_ColoredText
 		if c.onCUserMessageColoredText == nil {
 			return nil
 		}
@@ -2656,8 +2689,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 114: // dota.EBaseUserMessages_UM_RequestState
+	},
+	114: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_RequestState
 		if c.onCUserMessageRequestState == nil {
 			return nil
 		}
@@ -2675,8 +2708,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 115: // dota.EBaseUserMessages_UM_ResetHUD
+	},
+	115: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_ResetHUD
 		if c.onCUserMessageResetHUD == nil {
 			return nil
 		}
@@ -2694,8 +2727,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 116: // dota.EBaseUserMessages_UM_Rumble
+	},
+	116: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_Rumble
 		if c.onCUserMessageRumble == nil {
 			return nil
 		}
@@ -2713,8 +2746,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 117: // dota.EBaseUserMessages_UM_SayText
+	},
+	117: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_SayText
 		if c.onCUserMessageSayText == nil {
 			return nil
 		}
@@ -2732,8 +2765,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 118: // dota.EBaseUserMessages_UM_SayText2
+	},
+	118: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_SayText2
 		if c.onCUserMessageSayText2 == nil {
 			return nil
 		}
@@ -2751,8 +2784,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 119: // dota.EBaseUserMessages_UM_SayTextChannel
+	},
+	119: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_SayTextChannel
 		if c.onCUserMessageSayTextChannel == nil {
 			return nil
 		}
@@ -2770,8 +2803,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 120: // dota.EBaseUserMessages_UM_Shake
+	},
+	120: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_Shake
 		if c.onCUserMessageShake == nil {
 			return nil
 		}
@@ -2789,8 +2822,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 121: // dota.EBaseUserMessages_UM_ShakeDir
+	},
+	121: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_ShakeDir
 		if c.onCUserMessageShakeDir == nil {
 			return nil
 		}
@@ -2808,8 +2841,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 124: // dota.EBaseUserMessages_UM_TextMsg
+	},
+	124: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_TextMsg
 		if c.onCUserMessageTextMsg == nil {
 			return nil
 		}
@@ -2827,8 +2860,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 125: // dota.EBaseUserMessages_UM_ScreenTilt
+	},
+	125: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_ScreenTilt
 		if c.onCUserMessageScreenTilt == nil {
 			return nil
 		}
@@ -2846,8 +2879,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 126: // dota.EBaseUserMessages_UM_Train
+	},
+	126: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_Train
 		if c.onCUserMessageTrain == nil {
 			return nil
 		}
@@ -2865,8 +2898,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 127: // dota.EBaseUserMessages_UM_VGUIMenu
+	},
+	127: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_VGUIMenu
 		if c.onCUserMessageVGUIMenu == nil {
 			return nil
 		}
@@ -2884,8 +2917,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 128: // dota.EBaseUserMessages_UM_VoiceMask
+	},
+	128: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_VoiceMask
 		if c.onCUserMessageVoiceMask == nil {
 			return nil
 		}
@@ -2903,8 +2936,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 129: // dota.EBaseUserMessages_UM_VoiceSubtitle
+	},
+	129: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_VoiceSubtitle
 		if c.onCUserMessageVoiceSubtitle == nil {
 			return nil
 		}
@@ -2922,8 +2955,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 130: // dota.EBaseUserMessages_UM_SendAudio
+	},
+	130: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_SendAudio
 		if c.onCUserMessageSendAudio == nil {
 			return nil
 		}
@@ -2941,8 +2974,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 131: // dota.EBaseUserMessages_UM_ItemPickup
+	},
+	131: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_ItemPickup
 		if c.onCUserMessageItemPickup == nil {
 			return nil
 		}
@@ -2960,8 +2993,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 132: // dota.EBaseUserMessages_UM_AmmoDenied
+	},
+	132: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_AmmoDenied
 		if c.onCUserMessageAmmoDenied == nil {
 			return nil
 		}
@@ -2979,8 +3012,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 133: // dota.EBaseUserMessages_UM_CrosshairAngle
+	},
+	133: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_CrosshairAngle
 		if c.onCUserMessageCrosshairAngle == nil {
 			return nil
 		}
@@ -2998,8 +3031,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 134: // dota.EBaseUserMessages_UM_ShowMenu
+	},
+	134: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_ShowMenu
 		if c.onCUserMessageShowMenu == nil {
 			return nil
 		}
@@ -3017,8 +3050,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 135: // dota.EBaseUserMessages_UM_CreditsMsg
+	},
+	135: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_CreditsMsg
 		if c.onCUserMessageCreditsMsg == nil {
 			return nil
 		}
@@ -3036,8 +3069,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 136: // dota.EBaseEntityMessages_EM_PlayJingle
+	},
+	136: func(c *Callbacks, buf []byte) error { // dota.EBaseEntityMessages_EM_PlayJingle
 		if c.onCEntityMessagePlayJingle == nil {
 			return nil
 		}
@@ -3055,8 +3088,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 137: // dota.EBaseEntityMessages_EM_ScreenOverlay
+	},
+	137: func(c *Callbacks, buf []byte) error { // dota.EBaseEntityMessages_EM_ScreenOverlay
 		if c.onCEntityMessageScreenOverlay == nil {
 			return nil
 		}
@@ -3074,8 +3107,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 138: // dota.EBaseEntityMessages_EM_RemoveAllDecals
+	},
+	138: func(c *Callbacks, buf []byte) error { // dota.EBaseEntityMessages_EM_RemoveAllDecals
 		if c.onCEntityMessageRemoveAllDecals == nil {
 			return nil
 		}
@@ -3093,8 +3126,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 139: // dota.EBaseEntityMessages_EM_PropagateForce
+	},
+	139: func(c *Callbacks, buf []byte) error { // dota.EBaseEntityMessages_EM_PropagateForce
 		if c.onCEntityMessagePropagateForce == nil {
 			return nil
 		}
@@ -3112,8 +3145,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 140: // dota.EBaseEntityMessages_EM_DoSpark
+	},
+	140: func(c *Callbacks, buf []byte) error { // dota.EBaseEntityMessages_EM_DoSpark
 		if c.onCEntityMessageDoSpark == nil {
 			return nil
 		}
@@ -3131,8 +3164,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 141: // dota.EBaseEntityMessages_EM_FixAngle
+	},
+	141: func(c *Callbacks, buf []byte) error { // dota.EBaseEntityMessages_EM_FixAngle
 		if c.onCEntityMessageFixAngle == nil {
 			return nil
 		}
@@ -3150,8 +3183,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 142: // dota.EBaseUserMessages_UM_CloseCaptionPlaceholder
+	},
+	142: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_CloseCaptionPlaceholder
 		if c.onCUserMessageCloseCaptionPlaceholder == nil {
 			return nil
 		}
@@ -3169,8 +3202,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 143: // dota.EBaseUserMessages_UM_CameraTransition
+	},
+	143: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_CameraTransition
 		if c.onCUserMessageCameraTransition == nil {
 			return nil
 		}
@@ -3188,8 +3221,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 144: // dota.EBaseUserMessages_UM_AudioParameter
+	},
+	144: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_AudioParameter
 		if c.onCUserMessageAudioParameter == nil {
 			return nil
 		}
@@ -3207,8 +3240,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 150: // dota.EBaseUserMessages_UM_HapticsManagerPulse
+	},
+	150: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_HapticsManagerPulse
 		if c.onCUserMessageHapticsManagerPulse == nil {
 			return nil
 		}
@@ -3226,8 +3259,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 151: // dota.EBaseUserMessages_UM_HapticsManagerEffect
+	},
+	151: func(c *Callbacks, buf []byte) error { // dota.EBaseUserMessages_UM_HapticsManagerEffect
 		if c.onCUserMessageHapticsManagerEffect == nil {
 			return nil
 		}
@@ -3245,8 +3278,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 200: // dota.EBaseGameEvents_GE_VDebugGameSessionIDEvent
+	},
+	200: func(c *Callbacks, buf []byte) error { // dota.EBaseGameEvents_GE_VDebugGameSessionIDEvent
 		if c.onCMsgVDebugGameSessionIDEvent == nil {
 			return nil
 		}
@@ -3264,8 +3297,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 201: // dota.EBaseGameEvents_GE_PlaceDecalEvent
+	},
+	201: func(c *Callbacks, buf []byte) error { // dota.EBaseGameEvents_GE_PlaceDecalEvent
 		if c.onCMsgPlaceDecalEvent == nil {
 			return nil
 		}
@@ -3283,8 +3316,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 202: // dota.EBaseGameEvents_GE_ClearWorldDecalsEvent
+	},
+	202: func(c *Callbacks, buf []byte) error { // dota.EBaseGameEvents_GE_ClearWorldDecalsEvent
 		if c.onCMsgClearWorldDecalsEvent == nil {
 			return nil
 		}
@@ -3302,8 +3335,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 203: // dota.EBaseGameEvents_GE_ClearEntityDecalsEvent
+	},
+	203: func(c *Callbacks, buf []byte) error { // dota.EBaseGameEvents_GE_ClearEntityDecalsEvent
 		if c.onCMsgClearEntityDecalsEvent == nil {
 			return nil
 		}
@@ -3321,8 +3354,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 204: // dota.EBaseGameEvents_GE_ClearDecalsForSkeletonInstanceEvent
+	},
+	204: func(c *Callbacks, buf []byte) error { // dota.EBaseGameEvents_GE_ClearDecalsForSkeletonInstanceEvent
 		if c.onCMsgClearDecalsForSkeletonInstanceEvent == nil {
 			return nil
 		}
@@ -3340,8 +3373,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 205: // dota.EBaseGameEvents_GE_Source1LegacyGameEventList
+	},
+	205: func(c *Callbacks, buf []byte) error { // dota.EBaseGameEvents_GE_Source1LegacyGameEventList
 		if c.onCMsgSource1LegacyGameEventList == nil {
 			return nil
 		}
@@ -3359,8 +3392,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 206: // dota.EBaseGameEvents_GE_Source1LegacyListenEvents
+	},
+	206: func(c *Callbacks, buf []byte) error { // dota.EBaseGameEvents_GE_Source1LegacyListenEvents
 		if c.onCMsgSource1LegacyListenEvents == nil {
 			return nil
 		}
@@ -3378,8 +3411,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 207: // dota.EBaseGameEvents_GE_Source1LegacyGameEvent
+	},
+	207: func(c *Callbacks, buf []byte) error { // dota.EBaseGameEvents_GE_Source1LegacyGameEvent
 		if c.onCMsgSource1LegacyGameEvent == nil {
 			return nil
 		}
@@ -3397,8 +3430,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 208: // dota.EBaseGameEvents_GE_SosStartSoundEvent
+	},
+	208: func(c *Callbacks, buf []byte) error { // dota.EBaseGameEvents_GE_SosStartSoundEvent
 		if c.onCMsgSosStartSoundEvent == nil {
 			return nil
 		}
@@ -3416,8 +3449,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 209: // dota.EBaseGameEvents_GE_SosStopSoundEvent
+	},
+	209: func(c *Callbacks, buf []byte) error { // dota.EBaseGameEvents_GE_SosStopSoundEvent
 		if c.onCMsgSosStopSoundEvent == nil {
 			return nil
 		}
@@ -3435,8 +3468,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 210: // dota.EBaseGameEvents_GE_SosSetSoundEventParams
+	},
+	210: func(c *Callbacks, buf []byte) error { // dota.EBaseGameEvents_GE_SosSetSoundEventParams
 		if c.onCMsgSosSetSoundEventParams == nil {
 			return nil
 		}
@@ -3454,8 +3487,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 211: // dota.EBaseGameEvents_GE_SosSetLibraryStackFields
+	},
+	211: func(c *Callbacks, buf []byte) error { // dota.EBaseGameEvents_GE_SosSetLibraryStackFields
 		if c.onCMsgSosSetLibraryStackFields == nil {
 			return nil
 		}
@@ -3473,8 +3506,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 212: // dota.EBaseGameEvents_GE_SosStopSoundEventHash
+	},
+	212: func(c *Callbacks, buf []byte) error { // dota.EBaseGameEvents_GE_SosStopSoundEventHash
 		if c.onCMsgSosStopSoundEventHash == nil {
 			return nil
 		}
@@ -3492,8 +3525,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 465: // dota.EDotaUserMessages_DOTA_UM_AIDebugLine
+	},
+	465: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_AIDebugLine
 		if c.onCDOTAUserMsg_AIDebugLine == nil {
 			return nil
 		}
@@ -3511,8 +3544,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 466: // dota.EDotaUserMessages_DOTA_UM_ChatEvent
+	},
+	466: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ChatEvent
 		if c.onCDOTAUserMsg_ChatEvent == nil {
 			return nil
 		}
@@ -3530,8 +3563,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 467: // dota.EDotaUserMessages_DOTA_UM_CombatHeroPositions
+	},
+	467: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_CombatHeroPositions
 		if c.onCDOTAUserMsg_CombatHeroPositions == nil {
 			return nil
 		}
@@ -3549,8 +3582,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 470: // dota.EDotaUserMessages_DOTA_UM_CombatLogBulkData
+	},
+	470: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_CombatLogBulkData
 		if c.onCDOTAUserMsg_CombatLogBulkData == nil {
 			return nil
 		}
@@ -3568,8 +3601,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 471: // dota.EDotaUserMessages_DOTA_UM_CreateLinearProjectile
+	},
+	471: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_CreateLinearProjectile
 		if c.onCDOTAUserMsg_CreateLinearProjectile == nil {
 			return nil
 		}
@@ -3587,8 +3620,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 472: // dota.EDotaUserMessages_DOTA_UM_DestroyLinearProjectile
+	},
+	472: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_DestroyLinearProjectile
 		if c.onCDOTAUserMsg_DestroyLinearProjectile == nil {
 			return nil
 		}
@@ -3606,8 +3639,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 473: // dota.EDotaUserMessages_DOTA_UM_DodgeTrackingProjectiles
+	},
+	473: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_DodgeTrackingProjectiles
 		if c.onCDOTAUserMsg_DodgeTrackingProjectiles == nil {
 			return nil
 		}
@@ -3625,8 +3658,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 474: // dota.EDotaUserMessages_DOTA_UM_GlobalLightColor
+	},
+	474: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_GlobalLightColor
 		if c.onCDOTAUserMsg_GlobalLightColor == nil {
 			return nil
 		}
@@ -3644,8 +3677,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 475: // dota.EDotaUserMessages_DOTA_UM_GlobalLightDirection
+	},
+	475: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_GlobalLightDirection
 		if c.onCDOTAUserMsg_GlobalLightDirection == nil {
 			return nil
 		}
@@ -3663,8 +3696,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 476: // dota.EDotaUserMessages_DOTA_UM_InvalidCommand
+	},
+	476: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_InvalidCommand
 		if c.onCDOTAUserMsg_InvalidCommand == nil {
 			return nil
 		}
@@ -3682,8 +3715,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 477: // dota.EDotaUserMessages_DOTA_UM_LocationPing
+	},
+	477: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_LocationPing
 		if c.onCDOTAUserMsg_LocationPing == nil {
 			return nil
 		}
@@ -3701,8 +3734,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 478: // dota.EDotaUserMessages_DOTA_UM_MapLine
+	},
+	478: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_MapLine
 		if c.onCDOTAUserMsg_MapLine == nil {
 			return nil
 		}
@@ -3720,8 +3753,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 479: // dota.EDotaUserMessages_DOTA_UM_MiniKillCamInfo
+	},
+	479: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_MiniKillCamInfo
 		if c.onCDOTAUserMsg_MiniKillCamInfo == nil {
 			return nil
 		}
@@ -3739,8 +3772,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 480: // dota.EDotaUserMessages_DOTA_UM_MinimapDebugPoint
+	},
+	480: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_MinimapDebugPoint
 		if c.onCDOTAUserMsg_MinimapDebugPoint == nil {
 			return nil
 		}
@@ -3758,8 +3791,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 481: // dota.EDotaUserMessages_DOTA_UM_MinimapEvent
+	},
+	481: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_MinimapEvent
 		if c.onCDOTAUserMsg_MinimapEvent == nil {
 			return nil
 		}
@@ -3777,8 +3810,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 482: // dota.EDotaUserMessages_DOTA_UM_NevermoreRequiem
+	},
+	482: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_NevermoreRequiem
 		if c.onCDOTAUserMsg_NevermoreRequiem == nil {
 			return nil
 		}
@@ -3796,8 +3829,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 483: // dota.EDotaUserMessages_DOTA_UM_OverheadEvent
+	},
+	483: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_OverheadEvent
 		if c.onCDOTAUserMsg_OverheadEvent == nil {
 			return nil
 		}
@@ -3815,8 +3848,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 484: // dota.EDotaUserMessages_DOTA_UM_SetNextAutobuyItem
+	},
+	484: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_SetNextAutobuyItem
 		if c.onCDOTAUserMsg_SetNextAutobuyItem == nil {
 			return nil
 		}
@@ -3834,8 +3867,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 485: // dota.EDotaUserMessages_DOTA_UM_SharedCooldown
+	},
+	485: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_SharedCooldown
 		if c.onCDOTAUserMsg_SharedCooldown == nil {
 			return nil
 		}
@@ -3853,8 +3886,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 486: // dota.EDotaUserMessages_DOTA_UM_SpectatorPlayerClick
+	},
+	486: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_SpectatorPlayerClick
 		if c.onCDOTAUserMsg_SpectatorPlayerClick == nil {
 			return nil
 		}
@@ -3872,8 +3905,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 487: // dota.EDotaUserMessages_DOTA_UM_TutorialTipInfo
+	},
+	487: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_TutorialTipInfo
 		if c.onCDOTAUserMsg_TutorialTipInfo == nil {
 			return nil
 		}
@@ -3891,8 +3924,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 488: // dota.EDotaUserMessages_DOTA_UM_UnitEvent
+	},
+	488: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_UnitEvent
 		if c.onCDOTAUserMsg_UnitEvent == nil {
 			return nil
 		}
@@ -3910,8 +3943,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 490: // dota.EDotaUserMessages_DOTA_UM_BotChat
+	},
+	490: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_BotChat
 		if c.onCDOTAUserMsg_BotChat == nil {
 			return nil
 		}
@@ -3929,8 +3962,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 491: // dota.EDotaUserMessages_DOTA_UM_HudError
+	},
+	491: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_HudError
 		if c.onCDOTAUserMsg_HudError == nil {
 			return nil
 		}
@@ -3948,8 +3981,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 492: // dota.EDotaUserMessages_DOTA_UM_ItemPurchased
+	},
+	492: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ItemPurchased
 		if c.onCDOTAUserMsg_ItemPurchased == nil {
 			return nil
 		}
@@ -3967,8 +4000,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 493: // dota.EDotaUserMessages_DOTA_UM_Ping
+	},
+	493: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_Ping
 		if c.onCDOTAUserMsg_Ping == nil {
 			return nil
 		}
@@ -3986,8 +4019,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 494: // dota.EDotaUserMessages_DOTA_UM_ItemFound
+	},
+	494: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ItemFound
 		if c.onCDOTAUserMsg_ItemFound == nil {
 			return nil
 		}
@@ -4005,8 +4038,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 496: // dota.EDotaUserMessages_DOTA_UM_SwapVerify
+	},
+	496: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_SwapVerify
 		if c.onCDOTAUserMsg_SwapVerify == nil {
 			return nil
 		}
@@ -4024,8 +4057,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 497: // dota.EDotaUserMessages_DOTA_UM_WorldLine
+	},
+	497: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_WorldLine
 		if c.onCDOTAUserMsg_WorldLine == nil {
 			return nil
 		}
@@ -4043,8 +4076,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 498: // dota.EDotaUserMessages_DOTA_UM_TournamentDrop
+	},
+	498: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_TournamentDrop
 		if c.onCMsgGCToClientTournamentItemDrop == nil {
 			return nil
 		}
@@ -4062,8 +4095,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 499: // dota.EDotaUserMessages_DOTA_UM_ItemAlert
+	},
+	499: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ItemAlert
 		if c.onCDOTAUserMsg_ItemAlert == nil {
 			return nil
 		}
@@ -4081,8 +4114,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 500: // dota.EDotaUserMessages_DOTA_UM_HalloweenDrops
+	},
+	500: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_HalloweenDrops
 		if c.onCDOTAUserMsg_HalloweenDrops == nil {
 			return nil
 		}
@@ -4100,8 +4133,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 501: // dota.EDotaUserMessages_DOTA_UM_ChatWheel
+	},
+	501: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ChatWheel
 		if c.onCDOTAUserMsg_ChatWheel == nil {
 			return nil
 		}
@@ -4119,8 +4152,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 502: // dota.EDotaUserMessages_DOTA_UM_ReceivedXmasGift
+	},
+	502: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ReceivedXmasGift
 		if c.onCDOTAUserMsg_ReceivedXmasGift == nil {
 			return nil
 		}
@@ -4138,8 +4171,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 503: // dota.EDotaUserMessages_DOTA_UM_UpdateSharedContent
+	},
+	503: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_UpdateSharedContent
 		if c.onCDOTAUserMsg_UpdateSharedContent == nil {
 			return nil
 		}
@@ -4157,8 +4190,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 504: // dota.EDotaUserMessages_DOTA_UM_TutorialRequestExp
+	},
+	504: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_TutorialRequestExp
 		if c.onCDOTAUserMsg_TutorialRequestExp == nil {
 			return nil
 		}
@@ -4176,8 +4209,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 505: // dota.EDotaUserMessages_DOTA_UM_TutorialPingMinimap
+	},
+	505: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_TutorialPingMinimap
 		if c.onCDOTAUserMsg_TutorialPingMinimap == nil {
 			return nil
 		}
@@ -4195,8 +4228,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 506: // dota.EDotaUserMessages_DOTA_UM_GamerulesStateChanged
+	},
+	506: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_GamerulesStateChanged
 		if c.onCDOTAUserMsg_GamerulesStateChanged == nil {
 			return nil
 		}
@@ -4214,8 +4247,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 507: // dota.EDotaUserMessages_DOTA_UM_ShowSurvey
+	},
+	507: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ShowSurvey
 		if c.onCDOTAUserMsg_ShowSurvey == nil {
 			return nil
 		}
@@ -4233,8 +4266,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 508: // dota.EDotaUserMessages_DOTA_UM_TutorialFade
+	},
+	508: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_TutorialFade
 		if c.onCDOTAUserMsg_TutorialFade == nil {
 			return nil
 		}
@@ -4252,8 +4285,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 509: // dota.EDotaUserMessages_DOTA_UM_AddQuestLogEntry
+	},
+	509: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_AddQuestLogEntry
 		if c.onCDOTAUserMsg_AddQuestLogEntry == nil {
 			return nil
 		}
@@ -4271,8 +4304,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 510: // dota.EDotaUserMessages_DOTA_UM_SendStatPopup
+	},
+	510: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_SendStatPopup
 		if c.onCDOTAUserMsg_SendStatPopup == nil {
 			return nil
 		}
@@ -4290,8 +4323,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 511: // dota.EDotaUserMessages_DOTA_UM_TutorialFinish
+	},
+	511: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_TutorialFinish
 		if c.onCDOTAUserMsg_TutorialFinish == nil {
 			return nil
 		}
@@ -4309,8 +4342,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 512: // dota.EDotaUserMessages_DOTA_UM_SendRoshanPopup
+	},
+	512: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_SendRoshanPopup
 		if c.onCDOTAUserMsg_SendRoshanPopup == nil {
 			return nil
 		}
@@ -4328,8 +4361,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 513: // dota.EDotaUserMessages_DOTA_UM_SendGenericToolTip
+	},
+	513: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_SendGenericToolTip
 		if c.onCDOTAUserMsg_SendGenericToolTip == nil {
 			return nil
 		}
@@ -4347,8 +4380,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 514: // dota.EDotaUserMessages_DOTA_UM_SendFinalGold
+	},
+	514: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_SendFinalGold
 		if c.onCDOTAUserMsg_SendFinalGold == nil {
 			return nil
 		}
@@ -4366,8 +4399,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 515: // dota.EDotaUserMessages_DOTA_UM_CustomMsg
+	},
+	515: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_CustomMsg
 		if c.onCDOTAUserMsg_CustomMsg == nil {
 			return nil
 		}
@@ -4385,8 +4418,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 516: // dota.EDotaUserMessages_DOTA_UM_CoachHUDPing
+	},
+	516: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_CoachHUDPing
 		if c.onCDOTAUserMsg_CoachHUDPing == nil {
 			return nil
 		}
@@ -4404,8 +4437,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 517: // dota.EDotaUserMessages_DOTA_UM_ClientLoadGridNav
+	},
+	517: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ClientLoadGridNav
 		if c.onCDOTAUserMsg_ClientLoadGridNav == nil {
 			return nil
 		}
@@ -4423,8 +4456,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 518: // dota.EDotaUserMessages_DOTA_UM_TE_Projectile
+	},
+	518: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_TE_Projectile
 		if c.onCDOTAUserMsg_TE_Projectile == nil {
 			return nil
 		}
@@ -4442,8 +4475,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 519: // dota.EDotaUserMessages_DOTA_UM_TE_ProjectileLoc
+	},
+	519: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_TE_ProjectileLoc
 		if c.onCDOTAUserMsg_TE_ProjectileLoc == nil {
 			return nil
 		}
@@ -4461,8 +4494,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 520: // dota.EDotaUserMessages_DOTA_UM_TE_DotaBloodImpact
+	},
+	520: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_TE_DotaBloodImpact
 		if c.onCDOTAUserMsg_TE_DotaBloodImpact == nil {
 			return nil
 		}
@@ -4480,8 +4513,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 521: // dota.EDotaUserMessages_DOTA_UM_TE_UnitAnimation
+	},
+	521: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_TE_UnitAnimation
 		if c.onCDOTAUserMsg_TE_UnitAnimation == nil {
 			return nil
 		}
@@ -4499,8 +4532,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 522: // dota.EDotaUserMessages_DOTA_UM_TE_UnitAnimationEnd
+	},
+	522: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_TE_UnitAnimationEnd
 		if c.onCDOTAUserMsg_TE_UnitAnimationEnd == nil {
 			return nil
 		}
@@ -4518,8 +4551,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 523: // dota.EDotaUserMessages_DOTA_UM_AbilityPing
+	},
+	523: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_AbilityPing
 		if c.onCDOTAUserMsg_AbilityPing == nil {
 			return nil
 		}
@@ -4537,8 +4570,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 524: // dota.EDotaUserMessages_DOTA_UM_ShowGenericPopup
+	},
+	524: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ShowGenericPopup
 		if c.onCDOTAUserMsg_ShowGenericPopup == nil {
 			return nil
 		}
@@ -4556,8 +4589,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 525: // dota.EDotaUserMessages_DOTA_UM_VoteStart
+	},
+	525: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_VoteStart
 		if c.onCDOTAUserMsg_VoteStart == nil {
 			return nil
 		}
@@ -4575,8 +4608,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 526: // dota.EDotaUserMessages_DOTA_UM_VoteUpdate
+	},
+	526: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_VoteUpdate
 		if c.onCDOTAUserMsg_VoteUpdate == nil {
 			return nil
 		}
@@ -4594,8 +4627,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 		}
 
 		return nil
-
-	case 527: // dota.EDotaUserMessages_DOTA_UM_VoteEnd
+	},
+	527: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_VoteEnd
 		if c.onCDOTAUserMsg_VoteEnd == nil {
 			return nil
 		}
@@ -4614,7 +4647,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 528: // dota.EDotaUserMessages_DOTA_UM_BoosterState
+	},
+	528: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_BoosterState
 		if c.onCDOTAUserMsg_BoosterState == nil {
 			return nil
 		}
@@ -4633,7 +4667,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 529: // dota.EDotaUserMessages_DOTA_UM_WillPurchaseAlert
+	},
+	529: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_WillPurchaseAlert
 		if c.onCDOTAUserMsg_WillPurchaseAlert == nil {
 			return nil
 		}
@@ -4652,7 +4687,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 530: // dota.EDotaUserMessages_DOTA_UM_TutorialMinimapPosition
+	},
+	530: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_TutorialMinimapPosition
 		if c.onCDOTAUserMsg_TutorialMinimapPosition == nil {
 			return nil
 		}
@@ -4671,7 +4707,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 531: // dota.EDotaUserMessages_DOTA_UM_PlayerMMR
+	},
+	531: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_PlayerMMR
 		if c.onCDOTAUserMsg_PlayerMMR == nil {
 			return nil
 		}
@@ -4690,7 +4727,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 532: // dota.EDotaUserMessages_DOTA_UM_AbilitySteal
+	},
+	532: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_AbilitySteal
 		if c.onCDOTAUserMsg_AbilitySteal == nil {
 			return nil
 		}
@@ -4709,7 +4747,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 533: // dota.EDotaUserMessages_DOTA_UM_CourierKilledAlert
+	},
+	533: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_CourierKilledAlert
 		if c.onCDOTAUserMsg_CourierKilledAlert == nil {
 			return nil
 		}
@@ -4728,7 +4767,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 534: // dota.EDotaUserMessages_DOTA_UM_EnemyItemAlert
+	},
+	534: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_EnemyItemAlert
 		if c.onCDOTAUserMsg_EnemyItemAlert == nil {
 			return nil
 		}
@@ -4747,7 +4787,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 535: // dota.EDotaUserMessages_DOTA_UM_StatsMatchDetails
+	},
+	535: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_StatsMatchDetails
 		if c.onCDOTAUserMsg_StatsMatchDetails == nil {
 			return nil
 		}
@@ -4766,7 +4807,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 536: // dota.EDotaUserMessages_DOTA_UM_MiniTaunt
+	},
+	536: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_MiniTaunt
 		if c.onCDOTAUserMsg_MiniTaunt == nil {
 			return nil
 		}
@@ -4785,7 +4827,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 537: // dota.EDotaUserMessages_DOTA_UM_BuyBackStateAlert
+	},
+	537: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_BuyBackStateAlert
 		if c.onCDOTAUserMsg_BuyBackStateAlert == nil {
 			return nil
 		}
@@ -4804,7 +4847,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 538: // dota.EDotaUserMessages_DOTA_UM_SpeechBubble
+	},
+	538: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_SpeechBubble
 		if c.onCDOTAUserMsg_SpeechBubble == nil {
 			return nil
 		}
@@ -4823,7 +4867,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 539: // dota.EDotaUserMessages_DOTA_UM_CustomHeaderMessage
+	},
+	539: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_CustomHeaderMessage
 		if c.onCDOTAUserMsg_CustomHeaderMessage == nil {
 			return nil
 		}
@@ -4842,7 +4887,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 540: // dota.EDotaUserMessages_DOTA_UM_QuickBuyAlert
+	},
+	540: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_QuickBuyAlert
 		if c.onCDOTAUserMsg_QuickBuyAlert == nil {
 			return nil
 		}
@@ -4861,7 +4907,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 541: // dota.EDotaUserMessages_DOTA_UM_StatsHeroDetails
+	},
+	541: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_StatsHeroDetails
 		if c.onCDOTAUserMsg_StatsHeroMinuteDetails == nil {
 			return nil
 		}
@@ -4880,7 +4927,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 542: // dota.EDotaUserMessages_DOTA_UM_PredictionResult
+	},
+	542: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_PredictionResult
 		if c.onCDOTAUserMsg_PredictionResult == nil {
 			return nil
 		}
@@ -4899,7 +4947,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 543: // dota.EDotaUserMessages_DOTA_UM_ModifierAlert
+	},
+	543: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ModifierAlert
 		if c.onCDOTAUserMsg_ModifierAlert == nil {
 			return nil
 		}
@@ -4918,7 +4967,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 544: // dota.EDotaUserMessages_DOTA_UM_HPManaAlert
+	},
+	544: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_HPManaAlert
 		if c.onCDOTAUserMsg_HPManaAlert == nil {
 			return nil
 		}
@@ -4937,7 +4987,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 545: // dota.EDotaUserMessages_DOTA_UM_GlyphAlert
+	},
+	545: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_GlyphAlert
 		if c.onCDOTAUserMsg_GlyphAlert == nil {
 			return nil
 		}
@@ -4956,7 +5007,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 546: // dota.EDotaUserMessages_DOTA_UM_BeastChat
+	},
+	546: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_BeastChat
 		if c.onCDOTAUserMsg_BeastChat == nil {
 			return nil
 		}
@@ -4975,7 +5027,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 547: // dota.EDotaUserMessages_DOTA_UM_SpectatorPlayerUnitOrders
+	},
+	547: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_SpectatorPlayerUnitOrders
 		if c.onCDOTAUserMsg_SpectatorPlayerUnitOrders == nil {
 			return nil
 		}
@@ -4994,7 +5047,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 548: // dota.EDotaUserMessages_DOTA_UM_CustomHudElement_Create
+	},
+	548: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_CustomHudElement_Create
 		if c.onCDOTAUserMsg_CustomHudElement_Create == nil {
 			return nil
 		}
@@ -5013,7 +5067,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 549: // dota.EDotaUserMessages_DOTA_UM_CustomHudElement_Modify
+	},
+	549: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_CustomHudElement_Modify
 		if c.onCDOTAUserMsg_CustomHudElement_Modify == nil {
 			return nil
 		}
@@ -5032,7 +5087,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 550: // dota.EDotaUserMessages_DOTA_UM_CustomHudElement_Destroy
+	},
+	550: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_CustomHudElement_Destroy
 		if c.onCDOTAUserMsg_CustomHudElement_Destroy == nil {
 			return nil
 		}
@@ -5051,7 +5107,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 551: // dota.EDotaUserMessages_DOTA_UM_CompendiumState
+	},
+	551: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_CompendiumState
 		if c.onCDOTAUserMsg_CompendiumState == nil {
 			return nil
 		}
@@ -5070,7 +5127,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 552: // dota.EDotaUserMessages_DOTA_UM_ProjectionAbility
+	},
+	552: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ProjectionAbility
 		if c.onCDOTAUserMsg_ProjectionAbility == nil {
 			return nil
 		}
@@ -5089,7 +5147,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 553: // dota.EDotaUserMessages_DOTA_UM_ProjectionEvent
+	},
+	553: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ProjectionEvent
 		if c.onCDOTAUserMsg_ProjectionEvent == nil {
 			return nil
 		}
@@ -5108,7 +5167,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 554: // dota.EDotaUserMessages_DOTA_UM_CombatLogDataHLTV
+	},
+	554: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_CombatLogDataHLTV
 		if c.onCMsgDOTACombatLogEntry == nil {
 			return nil
 		}
@@ -5127,7 +5187,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 555: // dota.EDotaUserMessages_DOTA_UM_XPAlert
+	},
+	555: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_XPAlert
 		if c.onCDOTAUserMsg_XPAlert == nil {
 			return nil
 		}
@@ -5146,7 +5207,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 556: // dota.EDotaUserMessages_DOTA_UM_UpdateQuestProgress
+	},
+	556: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_UpdateQuestProgress
 		if c.onCDOTAUserMsg_UpdateQuestProgress == nil {
 			return nil
 		}
@@ -5165,7 +5227,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 557: // dota.EDotaUserMessages_DOTA_UM_MatchMetadata
+	},
+	557: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_MatchMetadata
 		if c.onCDOTAMatchMetadataFile == nil {
 			return nil
 		}
@@ -5184,7 +5247,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 559: // dota.EDotaUserMessages_DOTA_UM_QuestStatus
+	},
+	559: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_QuestStatus
 		if c.onCDOTAUserMsg_QuestStatus == nil {
 			return nil
 		}
@@ -5203,7 +5267,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 560: // dota.EDotaUserMessages_DOTA_UM_SuggestHeroPick
+	},
+	560: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_SuggestHeroPick
 		if c.onCDOTAUserMsg_SuggestHeroPick == nil {
 			return nil
 		}
@@ -5222,7 +5287,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 561: // dota.EDotaUserMessages_DOTA_UM_SuggestHeroRole
+	},
+	561: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_SuggestHeroRole
 		if c.onCDOTAUserMsg_SuggestHeroRole == nil {
 			return nil
 		}
@@ -5241,7 +5307,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 562: // dota.EDotaUserMessages_DOTA_UM_KillcamDamageTaken
+	},
+	562: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_KillcamDamageTaken
 		if c.onCDOTAUserMsg_KillcamDamageTaken == nil {
 			return nil
 		}
@@ -5260,7 +5327,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 563: // dota.EDotaUserMessages_DOTA_UM_SelectPenaltyGold
+	},
+	563: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_SelectPenaltyGold
 		if c.onCDOTAUserMsg_SelectPenaltyGold == nil {
 			return nil
 		}
@@ -5279,7 +5347,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 564: // dota.EDotaUserMessages_DOTA_UM_RollDiceResult
+	},
+	564: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_RollDiceResult
 		if c.onCDOTAUserMsg_RollDiceResult == nil {
 			return nil
 		}
@@ -5298,7 +5367,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 565: // dota.EDotaUserMessages_DOTA_UM_FlipCoinResult
+	},
+	565: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_FlipCoinResult
 		if c.onCDOTAUserMsg_FlipCoinResult == nil {
 			return nil
 		}
@@ -5317,7 +5387,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 568: // dota.EDotaUserMessages_DOTA_UM_SendRoshanSpectatorPhase
+	},
+	568: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_SendRoshanSpectatorPhase
 		if c.onCDOTAUserMsg_SendRoshanSpectatorPhase == nil {
 			return nil
 		}
@@ -5336,7 +5407,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 569: // dota.EDotaUserMessages_DOTA_UM_ChatWheelCooldown
+	},
+	569: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ChatWheelCooldown
 		if c.onCDOTAUserMsg_ChatWheelCooldown == nil {
 			return nil
 		}
@@ -5355,7 +5427,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 570: // dota.EDotaUserMessages_DOTA_UM_DismissAllStatPopups
+	},
+	570: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_DismissAllStatPopups
 		if c.onCDOTAUserMsg_DismissAllStatPopups == nil {
 			return nil
 		}
@@ -5374,7 +5447,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 571: // dota.EDotaUserMessages_DOTA_UM_TE_DestroyProjectile
+	},
+	571: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_TE_DestroyProjectile
 		if c.onCDOTAUserMsg_TE_DestroyProjectile == nil {
 			return nil
 		}
@@ -5393,7 +5467,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 572: // dota.EDotaUserMessages_DOTA_UM_HeroRelicProgress
+	},
+	572: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_HeroRelicProgress
 		if c.onCDOTAUserMsg_HeroRelicProgress == nil {
 			return nil
 		}
@@ -5412,7 +5487,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 573: // dota.EDotaUserMessages_DOTA_UM_AbilityDraftRequestAbility
+	},
+	573: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_AbilityDraftRequestAbility
 		if c.onCDOTAUserMsg_AbilityDraftRequestAbility == nil {
 			return nil
 		}
@@ -5431,7 +5507,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 574: // dota.EDotaUserMessages_DOTA_UM_ItemSold
+	},
+	574: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ItemSold
 		if c.onCDOTAUserMsg_ItemSold == nil {
 			return nil
 		}
@@ -5450,7 +5527,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 575: // dota.EDotaUserMessages_DOTA_UM_DamageReport
+	},
+	575: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_DamageReport
 		if c.onCDOTAUserMsg_DamageReport == nil {
 			return nil
 		}
@@ -5469,7 +5547,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 576: // dota.EDotaUserMessages_DOTA_UM_SalutePlayer
+	},
+	576: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_SalutePlayer
 		if c.onCDOTAUserMsg_SalutePlayer == nil {
 			return nil
 		}
@@ -5488,7 +5567,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 577: // dota.EDotaUserMessages_DOTA_UM_TipAlert
+	},
+	577: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_TipAlert
 		if c.onCDOTAUserMsg_TipAlert == nil {
 			return nil
 		}
@@ -5507,7 +5587,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 578: // dota.EDotaUserMessages_DOTA_UM_ReplaceQueryUnit
+	},
+	578: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ReplaceQueryUnit
 		if c.onCDOTAUserMsg_ReplaceQueryUnit == nil {
 			return nil
 		}
@@ -5526,7 +5607,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 579: // dota.EDotaUserMessages_DOTA_UM_EmptyTeleportAlert
+	},
+	579: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_EmptyTeleportAlert
 		if c.onCDOTAUserMsg_EmptyTeleportAlert == nil {
 			return nil
 		}
@@ -5545,7 +5627,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 580: // dota.EDotaUserMessages_DOTA_UM_MarsArenaOfBloodAttack
+	},
+	580: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_MarsArenaOfBloodAttack
 		if c.onCDOTAUserMsg_MarsArenaOfBloodAttack == nil {
 			return nil
 		}
@@ -5564,7 +5647,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 581: // dota.EDotaUserMessages_DOTA_UM_ESArcanaCombo
+	},
+	581: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ESArcanaCombo
 		if c.onCDOTAUserMsg_ESArcanaCombo == nil {
 			return nil
 		}
@@ -5583,7 +5667,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 582: // dota.EDotaUserMessages_DOTA_UM_ESArcanaComboSummary
+	},
+	582: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ESArcanaComboSummary
 		if c.onCDOTAUserMsg_ESArcanaComboSummary == nil {
 			return nil
 		}
@@ -5602,7 +5687,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 583: // dota.EDotaUserMessages_DOTA_UM_HighFiveLeftHanging
+	},
+	583: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_HighFiveLeftHanging
 		if c.onCDOTAUserMsg_HighFiveLeftHanging == nil {
 			return nil
 		}
@@ -5621,7 +5707,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 584: // dota.EDotaUserMessages_DOTA_UM_HighFiveCompleted
+	},
+	584: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_HighFiveCompleted
 		if c.onCDOTAUserMsg_HighFiveCompleted == nil {
 			return nil
 		}
@@ -5640,7 +5727,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 585: // dota.EDotaUserMessages_DOTA_UM_ShovelUnearth
+	},
+	585: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_ShovelUnearth
 		if c.onCDOTAUserMsg_ShovelUnearth == nil {
 			return nil
 		}
@@ -5659,7 +5747,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 587: // dota.EDotaUserMessages_DOTA_UM_RadarAlert
+	},
+	587: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_RadarAlert
 		if c.onCDOTAUserMsg_RadarAlert == nil {
 			return nil
 		}
@@ -5678,7 +5767,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 588: // dota.EDotaUserMessages_DOTA_UM_AllStarEvent
+	},
+	588: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_AllStarEvent
 		if c.onCDOTAUserMsg_AllStarEvent == nil {
 			return nil
 		}
@@ -5697,7 +5787,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 589: // dota.EDotaUserMessages_DOTA_UM_TalentTreeAlert
+	},
+	589: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_TalentTreeAlert
 		if c.onCDOTAUserMsg_TalentTreeAlert == nil {
 			return nil
 		}
@@ -5716,7 +5807,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 590: // dota.EDotaUserMessages_DOTA_UM_QueuedOrderRemoved
+	},
+	590: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_QueuedOrderRemoved
 		if c.onCDOTAUserMsg_QueuedOrderRemoved == nil {
 			return nil
 		}
@@ -5735,7 +5827,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 591: // dota.EDotaUserMessages_DOTA_UM_DebugChallenge
+	},
+	591: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_DebugChallenge
 		if c.onCDOTAUserMsg_DebugChallenge == nil {
 			return nil
 		}
@@ -5754,7 +5847,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 592: // dota.EDotaUserMessages_DOTA_UM_OMArcanaCombo
+	},
+	592: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_OMArcanaCombo
 		if c.onCDOTAUserMsg_OMArcanaCombo == nil {
 			return nil
 		}
@@ -5773,7 +5867,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 593: // dota.EDotaUserMessages_DOTA_UM_FoundNeutralItem
+	},
+	593: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_FoundNeutralItem
 		if c.onCDOTAUserMsg_FoundNeutralItem == nil {
 			return nil
 		}
@@ -5792,7 +5887,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 594: // dota.EDotaUserMessages_DOTA_UM_OutpostCaptured
+	},
+	594: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_OutpostCaptured
 		if c.onCDOTAUserMsg_OutpostCaptured == nil {
 			return nil
 		}
@@ -5811,7 +5907,8 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	case 595: // dota.EDotaUserMessages_DOTA_UM_OutpostGrantedXP
+	},
+	595: func(c *Callbacks, buf []byte) error { // dota.EDotaUserMessages_DOTA_UM_OutpostGrantedXP
 		if c.onCDOTAUserMsg_OutpostGrantedXP == nil {
 			return nil
 		}
@@ -5830,7 +5927,5 @@ func (c *Callbacks) callByPacketType(t int32, buf []byte) error {
 
 		return nil
 
-	}
-
-	return nil
+	},
 }
