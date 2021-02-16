@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"io"
 
-	"github.com/dotabuff/manta/dota"
+	"github.com/dataparser/manta/dota"
 	"github.com/golang/snappy"
 )
 

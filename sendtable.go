@@ -1,8 +1,9 @@
 package manta
 
 import (
-	"github.com/dotabuff/manta/dota"
 	"github.com/golang/protobuf/proto"
+
+	"github.com/dataparser/manta/dota"
 )
 
 var pointerTypes = map[string]bool{

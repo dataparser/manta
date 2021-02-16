@@ -1,6 +1,6 @@
 # Manta
 
-[![Build Status](https://travis-ci.org/dotabuff/manta.svg?branch=master)](https://travis-ci.org/dotabuff/manta) [![GoDoc](https://godoc.org/github.com/dotabuff/manta?status.svg)](https://godoc.org/github.com/dotabuff/manta)
+[![Build Status](https://travis-ci.org/dotabuff/manta.svg?branch=master)](https://travis-ci.org/dotabuff/manta) [![GoDoc](https://godoc.org/github.com/dataparser/manta?status.svg)](https://godoc.org/github.com/dataparser/manta)
 
 Manta is a fully functional Dota 2 replay parser written in [Go](https://golang.org), targeting the Source 2 (Dota 2 Reborn) game engine.
 
@@ -12,7 +12,7 @@ Manta is a low-level replay parser, meaning that it will provide you access to t
 
 Get the code:
 
-    go get github.com/dotabuff/manta
+    go get github.com/dataparser/manta
 
 Use it to parse a replay:
 
@@ -21,8 +21,8 @@ import (
   "log"
   "os"
 
-  "github.com/dotabuff/manta"
-  "github.com/dotabuff/manta/dota"
+  "github.com/dataparser/manta"
+  "github.com/dataparser/manta/dota"
 )
 
 func main() {
@@ -71,11 +71,11 @@ export PATH="/usr/local/bin:$PATH"
 
 ## License
 
-Manta is distributed under the [MIT license](https://github.com/dotabuff/manta/blob/master/LICENSE).
+Manta is distributed under the [MIT license](https://github.com/dataparser/manta/blob/master/LICENSE).
 
 ## Code of Conduct
 
-Manta has adopted the [Contributor Covenant Code of Conduct](https://github.com/dotabuff/manta/blob/master/CONDUCT.md).
+Manta has adopted the [Contributor Covenant Code of Conduct](https://github.com/dataparser/manta/blob/master/CONDUCT.md).
 
 ## Getting Help
 

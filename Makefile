@@ -10,7 +10,7 @@ bench:
 	go test -run=XXX -bench=BenchmarkMatch -benchtime=1m -v
 
 cover:
-	go test -cover -coverpkg github.com/dotabuff/manta,github.com/dotabuff/manta/vbkv -coverprofile /tmp/manta.cov -v
+	go test -cover -coverpkg github.com/dataparser/manta,github.com/dataparser/manta/vbkv -coverprofile /tmp/manta.cov -v
 	go tool cover -html=/tmp/manta.cov
 
 cpuprofile:

@@ -3,7 +3,7 @@ package manta
 import (
 	"github.com/golang/protobuf/proto"
 
-	"github.com/dotabuff/manta/dota"
+	"github.com/dataparser/manta/dota"
 )
 
 // Callbacks decodes and routes replay events to callback functions
